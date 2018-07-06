@@ -1,12 +1,12 @@
 #' academic
 #' @export
-academic <- function(.data, first.term, current.term) {
+academic <- function(.data, ...) {
   stopifnot(is.data.frame(.data))
-  termNames <- c(first.term, current.term)
-  .data[termNames] <- lapply(.data[termNames], function(x) as.term(as.character(x)))
-  structure(.data, 
-            first.term = first.term, 
-            current.term = current.term,
+  termNames <- unlist(list(...)) #c(first.term, current.term)
+  .data[termNames] <- lapply(.data[termNames], function(x) as_term(as.character(x)))
+  structure(.data,
+            first.term = termNames[1],
+            current.term = termNames[2],
             class = c("acad_df", class(.data))
   )
 }
@@ -16,11 +16,11 @@ academic <- function(.data, first.term, current.term) {
 #' @param x object to be converted to academic record
 #' @return academic data object
 #' @export
-as.academic <- function(x, ...) UseMethod("as.academic")
+as_academic <- function(x, ...) UseMethod("as_academic")
 
 #' @rdname acad_df
 #' @export
-as.academic.default <- function(x, ...) academic(x, ...)
+as_academic.default <- function(x, ...) academic(x, ...)
 
 reclass.acad_df <- function(old, new) {
   class(new) <- unique(c(class(old)[[1]], class(new)))
@@ -29,5 +29,14 @@ reclass.acad_df <- function(old, new) {
   new
 }
 
+#' @importFrom dplyr mutate
+#' @export
 mutate.acad_df <- function(.data, ...) reclass(.data, NextMethod())
+
+#' @importFrom dplyr arrange
+#' @export
 arrange.acad_df <- function(.data, ...) reclass(.data, NextMethod())
+
+#' @importFrom dplyr filter
+#' @export
+filter.acad_df <- function(.data, ...) reclass(.data, NextMethod())
